@@ -31,6 +31,9 @@ x86/
 ## Velopack output
 Releases/
 
+## Claude Code
+.claude/
+
 ## OS files
 Thumbs.db
 desktop.ini
