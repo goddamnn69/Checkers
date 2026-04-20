@@ -5,8 +5,7 @@ namespace Checkers.Services;
 
 public static class UpdateService
 {
-    // TODO: Replace with your actual GitHub repository URL after creating the repo
-    private const string RepoUrl = "https://github.com/USERNAME/Checkers";
+    private const string RepoUrl = "https://github.com/goddamnn69/Checkers";
 
     public static async Task<UpdateInfo?> CheckForUpdatesAsync()
     {
