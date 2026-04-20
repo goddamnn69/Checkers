@@ -19,12 +19,16 @@ public class LobbyViewModel : BaseViewModel
     private string _updateStatus = "";
     private bool _isUpdateAvailable;
     private UpdateInfo? _updateInfo;
+    private string? _localIp;
 
     public ICommand StartGameCommand { get; }
     public ICommand HostGameCommand { get; }
     public ICommand JoinGameCommand { get; }
     public ICommand UpdateCommand { get; }
+    public ICommand CopyIpCommand { get; }
     public event EventHandler<GameStartEventArgs>? StartGameRequested;
+
+    public bool HasIpToCopy => _localIp != null;
 
     public string VersionText
     {
@@ -110,6 +114,7 @@ public class LobbyViewModel : BaseViewModel
         HostGameCommand = new RelayCommand(HostGame);
         JoinGameCommand = new RelayCommand(JoinGame);
         UpdateCommand = new RelayCommand(ApplyUpdate);
+        CopyIpCommand = new RelayCommand(CopyIp);
 
         _ = CheckForUpdatesAsync();
     }
@@ -130,8 +135,9 @@ public class LobbyViewModel : BaseViewModel
         IsConnecting = true;
 
         _networkManager = new NetworkManager();
-        var localIp = NetworkManager.GetLocalIp();
-        ConnectionStatus = $"Ваш IP: {localIp}\nОжидание игрока...";
+        _localIp = NetworkManager.GetLocalIp();
+        OnPropertyChanged(nameof(HasIpToCopy));
+        ConnectionStatus = $"Ваш IP: {_localIp}\nОжидание игрока...";
 
         try
         {
@@ -189,6 +195,12 @@ public class LobbyViewModel : BaseViewModel
         {
             IsConnecting = false;
         }
+    }
+
+    private void CopyIp()
+    {
+        if (_localIp != null)
+            System.Windows.Clipboard.SetText(_localIp);
     }
 
     private async Task CheckForUpdatesAsync()

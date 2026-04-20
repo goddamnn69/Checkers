@@ -214,12 +214,42 @@
                 </Button>
 
                 <!-- Статус соединения -->
-                <TextBlock Text="{Binding ConnectionStatus}"
-                           Foreground="#f1c40f"
-                           FontSize="14"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap"/>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding ConnectionStatus}"
+                               Foreground="#f1c40f"
+                               FontSize="14"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
+                    <Button Content="Копировать IP"
+                            Command="{Binding CopyIpCommand}"
+                            Visibility="{Binding HasIpToCopy, Converter={StaticResource BoolToVis}}"
+                            Height="28"
+                            Width="120"
+                            FontSize="11"
+                            Background="#7f8c8d"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Margin="0,6,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="4"
+                                                    Padding="4">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

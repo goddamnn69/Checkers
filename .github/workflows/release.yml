@@ -35,7 +35,7 @@ jobs:
         continue-on-error: true
 
       - name: Pack with Velopack
-        run: vpk pack -u Checkers -v ${{ steps.version.outputs.version }} -p publish -e Checkers.exe
+        run: vpk pack -u Checkers -v ${{ steps.version.outputs.version }} -p publish -e Checkers.exe --icon Checkers/Checkers/app.ico
 
       - name: Upload to GitHub Releases
         run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "Checkers ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }} --token ${{ secrets.GITHUB_TOKEN }}
