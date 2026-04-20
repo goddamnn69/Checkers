@@ -26,8 +26,21 @@ public class LobbyViewModel : BaseViewModel
     public ICommand UpdateCommand { get; }
     public event EventHandler<GameStartEventArgs>? StartGameRequested;
 
-    public string VersionText =>
-        $"v{Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?"}";
+    public string VersionText
+    {
+        get
+        {
+            var attr = Assembly.GetEntryAssembly()?
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            var version = attr?.InformationalVersion ??
+                          Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ??
+                          "?";
+            // Strip build metadata (e.g. "+sha.abc123") if present
+            var plusIndex = version.IndexOf('+');
+            if (plusIndex >= 0) version = version[..plusIndex];
+            return $"v{version}";
+        }
+    }
 
     public string UpdateStatus
     {
