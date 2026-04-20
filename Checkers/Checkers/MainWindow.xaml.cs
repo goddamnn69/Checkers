@@ -23,6 +23,8 @@ public partial class MainWindow : Window
         };
 
         LobbyView.DataContext = lobbyViewModel;
+
+        GameView.BackToLobbyRequested += (_, _) => ShowLobby();
     }
 
     private void StartGame(GameStartEventArgs args)

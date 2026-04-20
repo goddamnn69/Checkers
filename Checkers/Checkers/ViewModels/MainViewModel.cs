@@ -12,6 +12,7 @@ public class MainViewModel : BaseViewModel
     private CellViewModel? _selectedCell;
     private CheckerColor _currentPlayer;
     private string _statusMessage = "";
+    private bool _isGameOver;
     private bool _isBotMode = false;
     private bool _isOnlineMode = false;
     private CheckerColor _myColor; // цвет локального игрока
@@ -28,6 +29,12 @@ public class MainViewModel : BaseViewModel
     {
         get => _statusMessage;
         set => SetField(ref _statusMessage, value);
+    }
+
+    public bool IsGameOver
+    {
+        get => _isGameOver;
+        set => SetField(ref _isGameOver, value);
     }
 
     public bool IsBotMode
@@ -90,6 +97,7 @@ public class MainViewModel : BaseViewModel
         if (winner != null)
         {
             StatusMessage = $"Победил: {ColorName(winner.Value)}";
+            IsGameOver = true;
             return;
         }
 
@@ -153,6 +161,7 @@ public class MainViewModel : BaseViewModel
                             if (botWinner != null)
                             {
                                 StatusMessage = $"Победил: {ColorName(botWinner.Value)}";
+                                IsGameOver = true;
                                 return;
                             }
 
@@ -200,6 +209,7 @@ public class MainViewModel : BaseViewModel
         if (winner != null)
         {
             StatusMessage = $"Победил: {ColorName(winner.Value)}";
+            IsGameOver = true;
             return;
         }
 

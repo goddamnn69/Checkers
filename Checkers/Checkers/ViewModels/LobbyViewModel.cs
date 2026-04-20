@@ -24,7 +24,6 @@ public class LobbyViewModel : BaseViewModel
     public ICommand StartGameCommand { get; }
     public ICommand HostGameCommand { get; }
     public ICommand JoinGameCommand { get; }
-    public ICommand UpdateCommand { get; }
     public ICommand CopyIpCommand { get; }
     public event EventHandler<GameStartEventArgs>? StartGameRequested;
 
@@ -113,7 +112,6 @@ public class LobbyViewModel : BaseViewModel
         StartGameCommand = new RelayCommand(StartGame);
         HostGameCommand = new RelayCommand(HostGame);
         JoinGameCommand = new RelayCommand(JoinGame);
-        UpdateCommand = new RelayCommand(ApplyUpdate);
         CopyIpCommand = new RelayCommand(CopyIp);
 
         _ = CheckForUpdatesAsync();
@@ -210,28 +208,13 @@ public class LobbyViewModel : BaseViewModel
             _updateInfo = await UpdateService.CheckForUpdatesAsync();
             if (_updateInfo != null)
             {
-                IsUpdateAvailable = true;
-                UpdateStatus = $"Доступна версия {_updateInfo.TargetFullRelease.Version}";
+                UpdateStatus = $"Обновление до {_updateInfo.TargetFullRelease.Version}...";
+                await UpdateService.DownloadAndApplyAsync(_updateInfo);
             }
         }
         catch
         {
             // Silently ignore update check failures (no network, no repo yet, etc.)
-        }
-    }
-
-    private async void ApplyUpdate()
-    {
-        if (_updateInfo == null) return;
-
-        UpdateStatus = "Загрузка обновления...";
-        try
-        {
-            await UpdateService.DownloadAndApplyAsync(_updateInfo);
-        }
-        catch (Exception ex)
-        {
-            UpdateStatus = $"Ошибка обновления: {ex.Message}";
         }
     }
 }

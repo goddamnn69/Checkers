@@ -13,7 +13,7 @@
     </UserControl.Resources>
 
     <Grid Margin="40">
-        <!-- Version + Update (bottom of lobby) -->
+        <!-- Version + Update status (bottom of lobby) -->
         <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,0">
             <TextBlock Text="{Binding VersionText}"
                        Foreground="#7f8c8d"
@@ -24,34 +24,6 @@
                        FontSize="12"
                        HorizontalAlignment="Center"
                        Margin="0,4,0,0"/>
-            <Button Content="Обновить"
-                    Command="{Binding UpdateCommand}"
-                    Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BoolToVis}}"
-                    Height="30"
-                    Width="120"
-                    FontSize="12"
-                    Background="#3498db"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    Margin="0,6,0,0">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="4"
-                                            Padding="6">
-                                        <ContentPresenter HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
         </StackPanel>
 
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">

@@ -35,9 +35,43 @@
         </Grid.RowDefinitions>
 
         <!-- Текст сверху: чей сейчас ход -->
-        <TextBlock Text="{Binding StatusMessage}"
-                   FontSize="24" FontWeight="Bold" Foreground="White"
-                   HorizontalAlignment="Center" Margin="0,0,0,20" />
+        <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="24" FontWeight="Bold" Foreground="White"
+                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+            <Button Content="В ЛОББИ"
+                    Click="OnBackToLobby"
+                    Visibility="{Binding IsGameOver, Converter={StaticResource BoolToVis}}"
+                    Height="36"
+                    Width="140"
+                    FontSize="14"
+                    FontWeight="Bold"
+                    Background="#e74c3c"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Margin="0,0,0,10">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            Padding="8">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+
+        <!-- Салют при победе -->
+        <local:ConfettiControl x:Name="Confetti" Grid.RowSpan="2" Panel.ZIndex="10" />
 
         <!-- Сама доска -->
         <ItemsControl Grid.Row="1" ItemsSource="{Binding Cells}">
