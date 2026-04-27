@@ -12,6 +12,7 @@ public class LobbyViewModel : BaseViewModel
 {
     private string _selectedGameMode = "PvP";
     private string _selectedPlayerColor = "White";
+    private string _playerName = "Шашечник";
     private string _remoteIp = "";
     private string _connectionStatus = "";
     private bool _isConnecting;
@@ -79,6 +80,19 @@ public class LobbyViewModel : BaseViewModel
         }
     }
 
+    public string Name
+    {
+        get => _playerName;
+        set
+        {
+            if (SetField(ref _playerName, value))
+            {
+                if (value.ToLower() == "костя")
+                    Name = "ЛОХ";
+            }
+        }
+    }
+
     public bool IsBlackColorEnabled => _selectedGameMode != "PvB";
     public bool IsOnlineMode => _selectedGameMode == "Online";
     public bool IsOfflineMode => _selectedGameMode != "Online";
@@ -124,7 +138,7 @@ public class LobbyViewModel : BaseViewModel
         if (!Enum.TryParse(_selectedPlayerColor, out CheckerColor colorEnum))
             colorEnum = CheckerColor.White;
 
-        StartGameRequested?.Invoke(this, new GameStartEventArgs(isBotMode, colorEnum));
+        StartGameRequested?.Invoke(this, new GameStartEventArgs(isBotMode, colorEnum, _playerName));
     }
 
     private async void HostGame()
@@ -146,6 +160,7 @@ public class LobbyViewModel : BaseViewModel
             StartGameRequested?.Invoke(this, new GameStartEventArgs(
                 isBotMode: false,
                 playerColor: CheckerColor.White,
+                name: _playerName,
                 isOnlineMode: true,
                 network: _networkManager,
                 isHost: true));
@@ -179,6 +194,7 @@ public class LobbyViewModel : BaseViewModel
             StartGameRequested?.Invoke(this, new GameStartEventArgs(
                 isBotMode: false,
                 playerColor: CheckerColor.Black,
+                name: _playerName,
                 isOnlineMode: true,
                 network: _networkManager,
                 isHost: false));
@@ -226,8 +242,9 @@ public class GameStartEventArgs : EventArgs
     public bool IsOnlineMode { get; }
     public NetworkManager? Network { get; }
     public bool IsHost { get; }
+    public string Name {  get; }
 
-    public GameStartEventArgs(bool isBotMode, CheckerColor playerColor,
+    public GameStartEventArgs(bool isBotMode, CheckerColor playerColor, string name,
         bool isOnlineMode = false, NetworkManager? network = null, bool isHost = false)
     {
         IsBotMode = isBotMode;
@@ -235,5 +252,6 @@ public class GameStartEventArgs : EventArgs
         IsOnlineMode = isOnlineMode;
         Network = network;
         IsHost = isHost;
+        Name = name;
     }
 }

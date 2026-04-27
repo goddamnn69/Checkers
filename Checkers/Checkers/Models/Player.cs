@@ -1,22 +1,16 @@
 ﻿namespace Checkers;
 
-/// <summary>
-/// Статический класс для управления текущим состоянием игрока.
-/// </summary>
-public static class Player
+public class Player
 {
-    /// <summary>
-    /// Текущий активный игрок (цвет шашек).
-    /// </summary>
-    public static CheckerColor CurrentPlayer { get; set; }
+    public CheckerColor CurrentPlayer { get; set; }
+    public event Action? PlayerSwitched;
 
-    /// <summary>
-    /// Переключает ход на следующего игрока.
-    /// </summary>
-    public static void SwitchPlayer()
+    public void SwitchPlayer()
     {
         CurrentPlayer = (CurrentPlayer == CheckerColor.White)
             ? CheckerColor.Black
             : CheckerColor.White;
+
+        PlayerSwitched?.Invoke();
     }
 }

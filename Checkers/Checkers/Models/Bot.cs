@@ -6,13 +6,13 @@ public class Bot
     /// Выбирает лучший ход для указанного цвета и выполняет его.
     /// Обрабатывает цепные взятия в цикле.
     /// </summary>
-    public static void MakeBotMove(Board board, CheckerColor color)
+    public static void MakeBotMove(Board board, CheckerColor color, Player player)
     {
         var allMoves = GameEngine.GetAllAvailableMoves(board, color);
         if (allMoves.Count == 0 || !board.HasCheckersColor(color)) return;
 
         var move = ChooseBestMove(allMoves, board, color);
-        var result = GameEngine.ExecuteMove(board, move);
+        var result = GameEngine.ExecuteMove(board, move, player);
 
         // Завершаем цепные взятия
         while (result.IsChainCapturePossible)
@@ -21,7 +21,7 @@ public class Bot
                                          .Where(m => m.IsCapture).ToList();
             if (nextCaptures.Count == 0) break;
             move = nextCaptures[new Random().Next(nextCaptures.Count)];
-            result = GameEngine.ExecuteMove(board, move);
+            result = GameEngine.ExecuteMove(board, move, player);
         }
     }
 

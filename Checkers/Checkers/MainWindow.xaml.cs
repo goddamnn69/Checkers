@@ -8,6 +8,8 @@ namespace Checkers;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private GameStartEventArgs? _lastGameArgs;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -25,21 +27,26 @@ public partial class MainWindow : Window
         LobbyView.DataContext = lobbyViewModel;
 
         GameView.BackToLobbyRequested += (_, _) => ShowLobby();
+        GameView.BackToGameRequested += (_, _) =>
+        {
+            if (_lastGameArgs != null)
+                StartGame(_lastGameArgs);
+        };
+
     }
 
     private void StartGame(GameStartEventArgs args)
     {
+        _lastGameArgs = args;
         MainViewModel mainViewModel;
 
         if (args.IsOnlineMode && args.Network != null)
         {
-            // Онлайн-игра: хост = белые, клиент = чёрные
-            mainViewModel = new MainViewModel(args.PlayerColor, args.Network);
+            mainViewModel = new MainViewModel(args.PlayerColor, args.Network, args.Name);
         }
         else
         {
-            // Оффлайн: PvP или PvB
-            mainViewModel = new MainViewModel(args.IsBotMode, args.PlayerColor);
+            mainViewModel = new MainViewModel(args.IsBotMode, args.PlayerColor, args.Name);
         }
 
         GameView.DataContext = mainViewModel;
@@ -50,6 +57,9 @@ public partial class MainWindow : Window
 
     private void ShowLobby()
     {
+        if (GameView.DataContext is MainViewModel vm)
+            vm.Disconnect();
+
         GameView.Visibility = Visibility.Collapsed;
         LobbyView.Visibility = Visibility.Visible;
     }

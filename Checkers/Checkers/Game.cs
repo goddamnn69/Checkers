@@ -11,6 +11,7 @@ public class Game
     /// </summary>
     public void Shashki()
     {
+        var player = new Player();
         var board = GameEngine.InitializeBoard(8, 8);
         Console.WriteLine("Хотите сыграть против бота? ");
         var answer = Console.ReadLine();
@@ -18,7 +19,7 @@ public class Game
         
         while (true)
         {
-            var currentPlayer = Player.CurrentPlayer;
+            var currentPlayer = player.CurrentPlayer;
             Console.Clear();
     
             // Проверка на победу перед началом хода
@@ -36,7 +37,7 @@ public class Game
 
             if (isBotMode && currentPlayer == CheckerColor.Black)
             {
-                Bot.MakeBotMove(board, currentPlayer);
+                Bot.MakeBotMove(board, currentPlayer, player);
                 continue;
             }
             
@@ -86,7 +87,7 @@ public class Game
                 
                 if (isBotMode && currentPlayer == CheckerColor.White)
                 {
-                    Bot.MakeBotMove(board, currentPlayer);
+                    Bot.MakeBotMove(board, currentPlayer, player);
                 }
 
                 Thread.Sleep(500);

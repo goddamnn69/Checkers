@@ -71,7 +71,7 @@ public static class GameEngine
     /// <summary>
     /// Выполняет ход и возвращает результат.
     /// </summary>
-    public static MoveResult ExecuteMove(Board board, Move move)
+    public static MoveResult ExecuteMove(Board board, Move move, Player player)
     {
         var cellFrom = board.GetCell(move.FromRow, move.FromCol);
         if (cellFrom?.Checker == null) return new MoveResult(false, "Нет шашки");
@@ -113,7 +113,7 @@ public static class GameEngine
 
         if (!isChainPossible)
         {
-            Player.SwitchPlayer();
+            player.SwitchPlayer();
         }
 
         return new MoveResult(true, isChainPossible ? "Бейте дальше!" : "Ход выполнен", move, isChainPossible);
