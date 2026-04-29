@@ -18,7 +18,6 @@ public class MainViewModel : BaseViewModel
     private CheckerColor _myColor;
     private NetworkManager? _network;
     private readonly Player _player = new();
-    private string _playerName = "";
 
     public Player Player => _player;
     public ObservableCollection<CellViewModel> Cells { get; } = new();
@@ -63,27 +62,44 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    public MainViewModel(bool isBotMode, CheckerColor currentPlayer, string playerName = "") : this()
+    public MainViewModel(bool isBotMode, CheckerColor currentPlayer, string playerName = "", string enemyName = "") : this()
     {
         _isBotMode = isBotMode;
         _currentPlayer = currentPlayer;
         _myColor = currentPlayer;
-        _playerName = playerName;
         _player.CurrentPlayer = _currentPlayer;
+
+        if (isBotMode)
+        {
+            _player.WhiteName = !string.IsNullOrEmpty(playerName) ? playerName : "Игрок";
+            _player.BlackName = "Бот";
+        }
+        else
+        {
+            _player.WhiteName = currentPlayer == CheckerColor.White
+                ? (!string.IsNullOrEmpty(playerName) ? playerName : "Белые")
+                : (!string.IsNullOrEmpty(enemyName) ? enemyName : "Белые");
+            _player.BlackName = currentPlayer == CheckerColor.Black
+                ? (!string.IsNullOrEmpty(playerName) ? playerName : "Черные")
+                : (!string.IsNullOrEmpty(enemyName) ? enemyName : "Черные");
+        }
+
         UpdateStatus();
     }
 
     /// <summary>
     /// Конструктор для онлайн-игры.
     /// </summary>
-    public MainViewModel(CheckerColor myColor, NetworkManager network, string playerName) : this()
+    public MainViewModel(CheckerColor myColor, NetworkManager network, string playerName, string enemyName) : this()
     {
         _isOnlineMode = true;
         _myColor = myColor;
         _network = network;
-        _playerName = playerName;
         _currentPlayer = CheckerColor.White;
         _player.CurrentPlayer = _currentPlayer;
+
+        _player.WhiteName = myColor == CheckerColor.White ? playerName : enemyName;
+        _player.BlackName = myColor == CheckerColor.Black ? playerName : enemyName;
 
         UpdateStatus();
 
@@ -101,7 +117,7 @@ public class MainViewModel : BaseViewModel
         var winner = GameEngine.CheckWinner(_board);
         if (winner != null)
         {
-            StatusMessage = $"Победил: {ColorName(winner.Value)}";
+            StatusMessage = $"Победил: {_player.GetName(winner.Value)}";
             IsGameOver = true;
             return;
         }
@@ -137,7 +153,6 @@ public class MainViewModel : BaseViewModel
         {
             var move = GameEngine.GetValidMovesForPiece(_board, _selectedCell.Row, _selectedCell.Col)
                                  .FirstOrDefault(m => m.ToRow == clickedCell.Row && m.ToCol == clickedCell.Col);
-
             if (move != null)
             {
                 var result = GameEngine.ExecuteMove(_board, move, _player);
@@ -145,7 +160,6 @@ public class MainViewModel : BaseViewModel
                 {
                     SyncBoard();
 
-                    // Отправляем ход сопернику
                     if (_isOnlineMode)
                         _ = _network!.SendMoveAsync(move);
 
@@ -165,7 +179,7 @@ public class MainViewModel : BaseViewModel
                             var botWinner = GameEngine.CheckWinner(_board);
                             if (botWinner != null)
                             {
-                                StatusMessage = $"Победил: {ColorName(botWinner.Value)}";
+                                StatusMessage = $"Победил: {_player.GetName(botWinner.Value)}";
                                 IsGameOver = true;
                                 return;
                             }
@@ -213,22 +227,13 @@ public class MainViewModel : BaseViewModel
         var winner = GameEngine.CheckWinner(_board);
         if (winner != null)
         {
-            var winnerName = winner.Value == _myColor ? _playerName : ColorName(winner.Value);
-            StatusMessage = $"Победил: {winnerName}";
+            StatusMessage = $"Победил: {_player.GetName(winner.Value)}";
             IsGameOver = true;
             return;
         }
 
-        if (_isOnlineMode)
-            StatusMessage = IsMyTurn() ? $"Ходит: {_playerName}" : "Ход соперника...";
-        else if (_isBotMode)
-            StatusMessage = _currentPlayer == _myColor ? $"Ходит: {_playerName}" : "Ходит: Бот";
-        else
-            StatusMessage = $"Ходят: {ColorName(_currentPlayer)}";
+        StatusMessage = $"Ходит: {_player.CurrentPlayerName}";
     }
-
-    private static string ColorName(CheckerColor color) =>
-        color == CheckerColor.White ? "Белые" : "Черные";
 
     private void SyncBoard()
     {

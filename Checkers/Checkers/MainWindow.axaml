@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:Checkers.Views"
+        x:Class="Checkers.MainWindow"
+        Title="Шашки" Height="750" Width="600"
+        Icon="/app.ico"
+        Background="#2c3e50">
+
+    <Grid>
+        <!-- Лобби (показывается по умолчанию) -->
+        <views:LobbyView x:Name="LobbyView" IsVisible="True" />
+
+        <!-- Игра (скрыта по умолчанию) -->
+        <views:GameView x:Name="GameView" IsVisible="False" />
+    </Grid>
+</Window>

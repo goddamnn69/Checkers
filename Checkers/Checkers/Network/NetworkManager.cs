@@ -2,7 +2,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
-using System.Windows;
+using Avalonia.Threading;
 
 namespace Checkers.Network;
 
@@ -20,6 +20,7 @@ public class NetworkManager
 
     public bool IsHost { get; private set; }
     public bool IsConnected { get; private set; }
+    public string RemoteName { get; private set; } = "";
 
     /// <summary>
     /// Вызывается в UI-потоке когда приходит ход от соперника.
@@ -51,7 +52,7 @@ public class NetworkManager
     /// <summary>
     /// Запускает сервер и ждёт подключения одного клиента.
     /// </summary>
-    public async Task StartHostAsync(int port = 5555)
+    public async Task StartHostAsync(string localName, int port = 5555)
     {
         IsHost = true;
         _listener = new TcpListener(IPAddress.Any, port);
@@ -61,13 +62,14 @@ public class NetworkManager
         SetupStream();
         IsConnected = true;
 
+        await ExchangeNamesAsync(localName);
         StartReceiving();
     }
 
     /// <summary>
     /// Подключается к хосту по IP.
     /// </summary>
-    public async Task ConnectAsync(string ip, int port = 5555)
+    public async Task ConnectAsync(string ip, string localName, int port = 5555)
     {
         IsHost = false;
         _client = new TcpClient();
@@ -75,6 +77,7 @@ public class NetworkManager
         SetupStream();
         IsConnected = true;
 
+        await ExchangeNamesAsync(localName);
         StartReceiving();
     }
 
@@ -109,6 +112,20 @@ public class NetworkManager
         _writer = new StreamWriter(stream);
     }
 
+    private async Task ExchangeNamesAsync(string localName)
+    {
+        var json = JsonSerializer.Serialize(new HandshakeDto { Name = localName });
+        await _writer!.WriteLineAsync(json);
+        await _writer.FlushAsync();
+
+        var line = await _reader!.ReadLineAsync();
+        if (line != null)
+        {
+            var dto = JsonSerializer.Deserialize<HandshakeDto>(line);
+            RemoteName = dto?.Name ?? "Противник";
+        }
+    }
+
     /// <summary>
     /// Фоновый цикл чтения ходов от соперника.
     /// </summary>
@@ -127,7 +144,7 @@ public class NetworkManager
                 var move = dto.ToMove();
 
                 // Вызываем событие в UI-потоке
-                Application.Current.Dispatcher.Invoke(() => MoveReceived?.Invoke(move));
+                Dispatcher.UIThread.Invoke(() => MoveReceived?.Invoke(move));
             }
         }
         catch (Exception)
@@ -136,7 +153,7 @@ public class NetworkManager
         }
 
         IsConnected = false;
-        Application.Current.Dispatcher.Invoke(() => Disconnected?.Invoke("Соединение потеряно"));
+        Dispatcher.UIThread.Invoke(() => Disconnected?.Invoke("Соединение потеряно"));
     }
 }
 
@@ -168,4 +185,9 @@ public class MoveDto
     }
 
     public Move ToMove() => new(FromRow, FromCol, ToRow, ToCol, IsCapture, CapturedRow, CapturedCol);
+}
+
+public class HandshakeDto
+{
+    public string Name { get; set; } = "";
 }

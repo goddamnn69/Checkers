@@ -1,6 +1,9 @@
 using System;
 using System.Reflection;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Checkers.Network;
 using Checkers.Services;
 using CommunityToolkit.Mvvm.Input;
@@ -13,6 +16,7 @@ public class LobbyViewModel : BaseViewModel
     private string _selectedGameMode = "PvP";
     private string _selectedPlayerColor = "White";
     private string _playerName = "Шашечник";
+    private string _enemyName = "Противник";
     private string _remoteIp = "";
     private string _connectionStatus = "";
     private bool _isConnecting;
@@ -83,13 +87,31 @@ public class LobbyViewModel : BaseViewModel
     public string Name
     {
         get => _playerName;
+        set => SetField(ref _playerName, value);
+    } 
+    public string EnemyName
+    {
+        get => _enemyName;
+        set => SetField(ref _enemyName, value);
+    } 
+
+    public int SelectedGameModeIndex
+    {
+        get => _selectedGameMode switch { "PvP" => 0, "PvB" => 1, "Online" => 2, _ => 0 };
         set
         {
-            if (SetField(ref _playerName, value))
-            {
-                if (value.ToLower() == "костя")
-                    Name = "ЛОХ";
-            }
+            SelectedGameMode = value switch { 0 => "PvP", 1 => "PvB", 2 => "Online", _ => "PvP" };
+            OnPropertyChanged();
+        }
+    }
+
+    public int SelectedPlayerColorIndex
+    {
+        get => _selectedPlayerColor == "White" ? 0 : 1;
+        set
+        {
+            SelectedPlayerColor = value == 0 ? "White" : "Black";
+            OnPropertyChanged();
         }
     }
 
@@ -138,7 +160,7 @@ public class LobbyViewModel : BaseViewModel
         if (!Enum.TryParse(_selectedPlayerColor, out CheckerColor colorEnum))
             colorEnum = CheckerColor.White;
 
-        StartGameRequested?.Invoke(this, new GameStartEventArgs(isBotMode, colorEnum, _playerName));
+        StartGameRequested?.Invoke(this, new GameStartEventArgs(isBotMode, colorEnum, _playerName, _enemyName));
     }
 
     private async void HostGame()
@@ -153,14 +175,14 @@ public class LobbyViewModel : BaseViewModel
 
         try
         {
-            await _networkManager.StartHostAsync();
+            await _networkManager.StartHostAsync(_playerName);
             ConnectionStatus = "Игрок подключился!";
 
-            // Хост играет белыми
             StartGameRequested?.Invoke(this, new GameStartEventArgs(
                 isBotMode: false,
                 playerColor: CheckerColor.White,
                 name: _playerName,
+                enemyName: _networkManager.RemoteName,
                 isOnlineMode: true,
                 network: _networkManager,
                 isHost: true));
@@ -187,14 +209,14 @@ public class LobbyViewModel : BaseViewModel
 
         try
         {
-            await _networkManager.ConnectAsync(RemoteIp.Trim());
+            await _networkManager.ConnectAsync(RemoteIp.Trim(), _playerName);
             ConnectionStatus = "Подключено!";
 
-            // Клиент играет чёрными
             StartGameRequested?.Invoke(this, new GameStartEventArgs(
                 isBotMode: false,
                 playerColor: CheckerColor.Black,
                 name: _playerName,
+                enemyName: _networkManager.RemoteName,
                 isOnlineMode: true,
                 network: _networkManager,
                 isHost: false));
@@ -211,10 +233,15 @@ public class LobbyViewModel : BaseViewModel
         }
     }
 
-    private void CopyIp()
+    private async void CopyIp()
     {
-        if (_localIp != null)
-            System.Windows.Clipboard.SetText(_localIp);
+        if (_localIp == null) return;
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var clipboard = desktop.MainWindow?.Clipboard;
+            if (clipboard != null)
+                await clipboard.SetTextAsync(_localIp);
+        }
     }
 
     private async Task CheckForUpdatesAsync()
@@ -243,8 +270,9 @@ public class GameStartEventArgs : EventArgs
     public NetworkManager? Network { get; }
     public bool IsHost { get; }
     public string Name {  get; }
+    public string EnemyName {  get; }
 
-    public GameStartEventArgs(bool isBotMode, CheckerColor playerColor, string name,
+    public GameStartEventArgs(bool isBotMode, CheckerColor playerColor, string name, string enemyName,
         bool isOnlineMode = false, NetworkManager? network = null, bool isHost = false)
     {
         IsBotMode = isBotMode;
@@ -253,5 +281,6 @@ public class GameStartEventArgs : EventArgs
         Network = network;
         IsHost = isHost;
         Name = name;
+        EnemyName = enemyName;
     }
 }

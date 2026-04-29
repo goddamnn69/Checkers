@@ -1,11 +1,8 @@
-using System.Windows;
+using Avalonia.Controls;
 using Checkers.ViewModels;
 
 namespace Checkers;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
     private GameStartEventArgs? _lastGameArgs;
@@ -32,7 +29,6 @@ public partial class MainWindow : Window
             if (_lastGameArgs != null)
                 StartGame(_lastGameArgs);
         };
-
     }
 
     private void StartGame(GameStartEventArgs args)
@@ -42,17 +38,17 @@ public partial class MainWindow : Window
 
         if (args.IsOnlineMode && args.Network != null)
         {
-            mainViewModel = new MainViewModel(args.PlayerColor, args.Network, args.Name);
+            mainViewModel = new MainViewModel(args.PlayerColor, args.Network, args.Name, args.EnemyName);
         }
         else
         {
-            mainViewModel = new MainViewModel(args.IsBotMode, args.PlayerColor, args.Name);
+            mainViewModel = new MainViewModel(args.IsBotMode, args.PlayerColor, args.Name, args.EnemyName);
         }
 
         GameView.DataContext = mainViewModel;
 
-        LobbyView.Visibility = Visibility.Collapsed;
-        GameView.Visibility = Visibility.Visible;
+        LobbyView.IsVisible = false;
+        GameView.IsVisible = true;
     }
 
     private void ShowLobby()
@@ -60,7 +56,7 @@ public partial class MainWindow : Window
         if (GameView.DataContext is MainViewModel vm)
             vm.Disconnect();
 
-        GameView.Visibility = Visibility.Collapsed;
-        LobbyView.Visibility = Visibility.Visible;
+        GameView.IsVisible = false;
+        LobbyView.IsVisible = true;
     }
 }

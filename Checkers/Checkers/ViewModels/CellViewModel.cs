@@ -15,7 +15,7 @@ public class CellViewModel : BaseViewModel
     public CellColor CellColor
     {
         get => IsTarget ? CellColor.Green  : _isColor;
-        // set => SetField(ref _isColor, value);
+        set => SetField(ref _isColor, value);
     }
     public Checker? Checker
     {

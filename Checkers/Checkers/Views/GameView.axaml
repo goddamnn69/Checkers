@@ -1,0 +1,132 @@
+<UserControl x:Class="Checkers.Views.GameView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Checkers.Views"
+             xmlns:vm="clr-namespace:Checkers.ViewModels"
+             xmlns:conv="clr-namespace:Checkers.Converters"
+             x:Name="Root">
+
+    <UserControl.Resources>
+        <conv:CellBackgroundConverter x:Key="CellBgConverter" />
+        <conv:CheckerColorToBrushConverter x:Key="CheckerColorBrush" />
+
+        <!-- Иконка короны для дамки -->
+        <DrawingImage x:Key="CrownIcon">
+            <DrawingImage.Drawing>
+                <GeometryDrawing Brush="Gold" Geometry="M2,4 L3,12 L21,12 L22,4 L16,11 L12,4 L8,11 Z M3,16 L21,16 L21,18 L3,18 Z">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="#b8860b" Thickness="1" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Button Content=""
+                Click="OnKal"
+                Height=""
+                Width="40"
+                FontSize="14"
+                FontWeight="Bold"
+                Background="#2c3e50"
+                BorderThickness="0"
+                Cursor="Hand"
+                Margin="0,0,0,0"
+                CornerRadius="6"
+                Padding="8"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"/>
+        <!-- Текст сверху: чей сейчас ход -->
+        <StackPanel HorizontalAlignment="Center">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="24" FontWeight="Bold" Foreground="White"
+                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+      
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        IsVisible="{Binding IsGameOver}"
+                        Margin="0,0,0,5">
+                <Button Content="В ЛОББИ"
+                        Click="OnBackToLobby"
+                        Height="36"
+                        Width="140"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Background="#e74c3c"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,5,0"
+                        CornerRadius="6"
+                        Padding="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+                <Button Content="ЗАНОВО"
+                        Click="OnBackToGame"
+                        Height="36"
+                        Width="140"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Background="Green"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="5,0,0,0"
+                        CornerRadius="6"
+                        Padding="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Салют при победе -->
+        <local:ConfettiControl x:Name="Confetti" Grid.RowSpan="2" ZIndex="10" />
+
+        <!-- Сама доска -->
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding Cells}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="8" Columns="8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:CellViewModel">
+                    <Button Command="{Binding #Root.DataContext.HandleCellClickCommand}"
+                            CommandParameter="{Binding}"
+                            BorderThickness="1"
+                            Padding="40"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center">
+                        <Button.Background>
+                            <MultiBinding Converter="{StaticResource CellBgConverter}">
+                                <Binding Path="IsDark" />
+                                <Binding Path="IsSelected" />
+                                <Binding Path="IsTarget" />
+                            </MultiBinding>
+                        </Button.Background>
+
+                        <!-- Рисуем шашку внутри кнопки (если она есть) -->
+                        <Grid>
+                            <Ellipse Width="40" Height="40"
+                                     Stroke="Black" StrokeThickness="1"
+                                     IsVisible="{Binding HasChecker}"
+                                     Fill="{Binding CheckerColorName, Converter={StaticResource CheckerColorBrush}}" />
+                            <!-- Корона для дамки -->
+                            <Image Width="20" Height="20"
+                                   Source="{StaticResource CrownIcon}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding IsKing}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>
