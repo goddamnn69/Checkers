@@ -1,0 +1,178 @@
+<UserControl x:Class="Checkers.Views.LobbyView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Checkers.Views"
+             xmlns:checkers="clr-namespace:Checkers">
+
+    <Grid Margin="40">
+        <!-- Version + Update status (bottom of lobby) -->
+        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,0">
+            <TextBlock Text="{Binding VersionText}"
+                       Foreground="#7f8c8d"
+                       FontSize="12"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding UpdateStatus}"
+                       Foreground="#f1c40f"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0"/>
+            <TextBlock Text="AVALONIA NOW"
+                       Foreground="#f1c40f"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <!-- Заголовок -->
+            <TextBlock Text="ШАШКИ"
+                       FontSize="48"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,40"/>
+
+            <!-- Режим игры -->
+            <TextBlock Text="Режим игры:"
+                       Foreground="White"
+                       FontSize="18"
+                       Margin="0,0,0,10"/>
+            <ComboBox Name="GameModeComboBox"
+                      SelectedIndex="{Binding SelectedGameModeIndex}"
+                      Height="35"
+                      Width="250"
+                      FontSize="14"
+                      Margin="0,0,0,20">
+                <ComboBoxItem Content="Игрок против Игрока" />
+                <ComboBoxItem Content="Игрок против Бота" />
+                <ComboBoxItem Content="Онлайн (LAN)" />
+            </ComboBox>
+            <StackPanel IsVisible="{Binding IsOnlineMode}">
+
+                <!-- Кнопка "Создать игру" (хост) -->
+                <Button Content="СОЗДАТЬ ИГРУ (Хост)"
+                        Command="{Binding HostGameCommand}"
+                        Height="50"
+                        Width="250"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Background="#3498db"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,0,15"
+                        CornerRadius="8"
+                        BorderBrush="#2980b9"
+                        Padding="10"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+
+                <!-- Разделитель -->
+                <TextBlock Text="— или —"
+                           Foreground="#7f8c8d"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,15"/>
+
+                <!-- Ввод IP + кнопка подключения -->
+                <TextBlock Text="Введите имя:"
+                           Foreground="White"
+                           FontSize="16"
+                           Margin="0,0,0,10"/>
+
+                <TextBox Text="{Binding Name}"
+                         Height="35"
+                         Width="250"
+                         FontSize="14"
+                         Margin="0,0,0,15"/>
+
+                <TextBlock Text="IP хоста:"
+                           Foreground="White"
+                           FontSize="16"
+                           Margin="0,0,0,5"/>
+
+                <TextBox Text="{Binding RemoteIp}"
+                         Height="35"
+                         Width="250"
+                         FontSize="14"
+                         Margin="0,0,0,15"/>
+
+                <Button Content="ПОДКЛЮЧИТЬСЯ"
+                        Command="{Binding JoinGameCommand}"
+                        Height="50"
+                        Width="250"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        Background="#e67e22"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Margin="0,0,0,20"
+                        CornerRadius="8"
+                        BorderBrush="#d35400"
+                        Padding="10"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+
+                <!-- Статус соединения -->
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding ConnectionStatus}"
+                               Foreground="#f1c40f"
+                               FontSize="14"
+                               HorizontalAlignment="Center"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"/>
+                    <Button Content="Копировать IP"
+                            Command="{Binding CopyIpCommand}"
+                            IsVisible="{Binding HasIpToCopy}"
+                            Height="28"
+                            Width="120"
+                            FontSize="11"
+                            Background="#7f8c8d"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Margin="0,6,0,0"
+                            CornerRadius="4"
+                            Padding="4"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Оффлайн: выбор цвета + кнопка старта -->
+            <StackPanel IsVisible="{Binding IsOfflineMode}">
+                <TextBlock Text="Ваши шашки:"
+                           Foreground="White"
+                           FontSize="18"
+                           Margin="0,0,0,10"/>
+                <ComboBox Name="PlayerColorComboBox"
+                          SelectedIndex="{Binding SelectedPlayerColorIndex}"
+                          Height="35"
+                          Width="250"
+                          FontSize="14"
+                          Margin="0,0,0,30">
+                    <ComboBoxItem Content="Белые" />
+                    <ComboBoxItem Content="Черные"
+                                  IsEnabled="{Binding IsBlackColorEnabled}"/>
+                </ComboBox>
+
+                <Button Content="НАЧАТЬ ИГРУ"
+                        Command="{Binding StartGameCommand}"
+                        Height="60"
+                        Width="250"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        Background="#2ecc71"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        CornerRadius="8"
+                        BorderBrush="#27ae60"
+                        Padding="15"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

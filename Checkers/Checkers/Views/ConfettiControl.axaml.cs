@@ -1,7 +1,7 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace Checkers.Views;
 
@@ -18,22 +18,22 @@ public partial class ConfettiControl : UserControl
         _timer.Tick += OnTick;
     }
 
-    public void Start()
+    public void Start(string emoji)
     {
         _particles.Clear();
         ConfettiCanvas.Children.Clear();
 
-        double w = ActualWidth > 0 ? ActualWidth : 500;
-        double h = ActualHeight > 0 ? ActualHeight : 600;
+        double w = Bounds.Width > 0 ? Bounds.Width : 500;
+        double h = Bounds.Height > 0 ? Bounds.Height : 600;
 
-        for (int i = 0; i < 60; i++)
+        for (int i = 0; i < 160; i++)
         {
             var size = 14 + _rng.NextDouble() * 18;
             var tb = new TextBlock
             {
-                Text = "\U0001F346",
+                Text = emoji,
                 FontSize = size,
-                RenderTransformOrigin = new Point(0.5, 0.5),
+                RenderTransformOrigin = new RelativePoint(0.5, 0.5, RelativeUnit.Relative),
                 RenderTransform = new RotateTransform(_rng.NextDouble() * 360)
             };
 
@@ -55,7 +55,7 @@ public partial class ConfettiControl : UserControl
 
     private void OnTick(object? sender, EventArgs e)
     {
-        double h = ActualHeight > 0 ? ActualHeight : 600;
+        double h = Bounds.Height > 0 ? Bounds.Height : 600;
         int offScreen = 0;
 
         for (int i = 0; i < _particles.Count; i++)
@@ -69,7 +69,7 @@ public partial class ConfettiControl : UserControl
 
             Canvas.SetLeft(tb, x);
             Canvas.SetTop(tb, y);
-            ((RotateTransform)tb.RenderTransform).Angle = rotation;
+            ((RotateTransform)tb.RenderTransform!).Angle = rotation;
 
             _particles[i] = (tb, vx, vy, rotation, rotSpeed);
 
