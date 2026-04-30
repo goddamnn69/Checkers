@@ -92,6 +92,13 @@ public class MainViewModel : BaseViewModel
     /// </summary>
     public MainViewModel(CheckerColor myColor, NetworkManager network, string playerName, string enemyName) : this()
     {
+        if (myColor == CheckerColor.Black)
+        {
+            var reversed = Cells.Reverse().ToList();
+            Cells.Clear();
+            foreach (var cell in reversed)
+                Cells.Add(cell);
+        }
         _isOnlineMode = true;
         _myColor = myColor;
         _network = network;
