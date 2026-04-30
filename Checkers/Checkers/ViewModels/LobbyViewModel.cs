@@ -257,7 +257,7 @@ public class LobbyViewModel : BaseViewModel
         }
         catch
         {
-            // Silently ignore update check failures (no network, no repo yet, etc.)
+            // подумать че делать если не получается обновиться
         }
     }
 }

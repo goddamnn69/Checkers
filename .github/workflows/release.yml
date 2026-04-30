@@ -8,7 +8,39 @@ permissions:
   contents: write
 
 jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: ubuntu-latest
+            rid: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish
+        run: dotnet publish Checkers/Checkers/Checkers.csproj -c Release -o publish -r ${{ matrix.rid }} --self-contained true
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.rid }}
+          path: publish/
+
   release:
+    needs: build
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -24,14 +56,10 @@ jobs:
         shell: bash
         run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
-      - name: Restore
-        run: dotnet restore Checkers/Checkers.sln
-
-      - name: Build
-        run: dotnet build Checkers/Checkers.sln -c Release --no-restore
-
-      - name: Publish
-        run: dotnet publish Checkers/Checkers/Checkers.csproj -c Release -o publish -r win-x64 --self-contained true
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
 
       - name: Install vpk
         run: dotnet tool install -g vpk
@@ -40,8 +68,22 @@ jobs:
         run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Pack with Velopack
-        run: vpk pack -u Checkers -v ${{ steps.version.outputs.version }} -p publish -e Checkers.exe --icon Checkers/Checkers/app.ico
+      - name: Pack Windows with Velopack
+        run: vpk pack -u Checkers -v ${{ steps.version.outputs.version }} -p artifacts/win-x64 -e Checkers.exe --icon Checkers/Checkers/app.ico
 
-      - name: Upload to GitHub Releases
+      - name: Upload Velopack to GitHub Releases
         run: vpk upload github --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "Checkers ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }} --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package macOS and Linux
+        shell: bash
+        run: |
+          cd artifacts
+          tar -czf ../Checkers-osx-x64.tar.gz -C osx-x64 .
+          tar -czf ../Checkers-osx-arm64.tar.gz -C osx-arm64 .
+          tar -czf ../Checkers-linux-x64.tar.gz -C linux-x64 .
+
+      - name: Upload macOS and Linux to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} Checkers-osx-x64.tar.gz Checkers-osx-arm64.tar.gz Checkers-linux-x64.tar.gz
